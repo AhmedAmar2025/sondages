@@ -1,0 +1,59 @@
+
+# Ne pas versionner les dépendances
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.*.local
+
+# Logs
+logs/
+*.log
+*.csv
+*.sqlite
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDEs / editors
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+
+# Database and cache
+*.sqlite
+*.db
+*.bak
+*.tmp
+
+# Build directories
+dist/
+build/
+coverage/
+
+# Git
+.git/
+.gitignore
+
+# Large files
+*.dat
+*.bin
+
+# Optional: Ignore test coverage and reports
+coverage/
+*.lcov
+
+# Optional: Ignore uploads or assets
+uploads/
+public/uploads/

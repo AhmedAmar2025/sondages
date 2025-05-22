@@ -2,12 +2,26 @@
 // IMPORTS & CONFIGURATION
 // =============================================
 
+
+require('dotenv').config();
+console.log("Loaded ENV:", {
+  DB_HOST: process.env.DB_HOST,
+  DB_USER: process.env.DB_USER,
+  DB_PASSWORD: process.env.DB_PASSWORD,
+  DB_NAME: process.env.DB_NAME,
+  DB_PORT: process.env.DB_PORT
+});
+
 const express = require("express");
 const session = require("express-session");
 const dotenv = require("dotenv");
 const path = require("path");
 const passport = require("passport");
 const db = require('./config/db');
+
+
+
+
 
 
 process.on('uncaughtException', (err) => {
@@ -21,6 +35,8 @@ console.log(process.env.DB_HOST); // doit afficher "tramway.proxy.rlwy.net"
 
 // Load environment variables
 dotenv.config({ path: process.env.ENV_PATH || './secret.env' });
+
+console.log("✅ DB_HOST =", process.env.DB_HOST);
 
 // Initialiser Express app
 const app = express();
@@ -43,18 +59,25 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); // obligatoire pour parser les requêtes POST JSON
 
 
-// Session
+
+
+const MySQLStore = require('express-mysql-session')(session);
+
+const sessionStore = new MySQLStore({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT
+});
+
 app.use(session({
-  secret: "votre_clé_secrète_complexe",
+  secret: process.env.SESSION_SECRET || 'defaultSecret',
   resave: false,
   saveUninitialized: false,
-  cookie: {
-    maxAge: 24 * 60 * 60 * 1000,
-    httpOnly: true,
-    secure: false,
-    path: '/'
-  }
+  store: sessionStore
 }));
+
 
 // Simuler IP (à désactiver en prod)
 app.use((req, res, next) => {
@@ -294,15 +317,30 @@ app.use((err, req, res, next) => {
 // =============================================
 // DATABASE CONNECTION TEST
 // =============================================
-(async () => {
+
+
+async function testDbConnection() {
   try {
-    const connection = await db.getConnection();
-    console.log('✅ Database connection established');
-    connection.release();
-  } catch (err) {
-    console.error('❌ Database connection error:', err);
+    const [rows] = await db.query('SELECT 1');
+    console.log('✅ DB connection OK');
+  } catch (error) {
+    console.error('❌ Database connection error:', error);
   }
-})();
+}
+
+testDbConnection();
+
+
+app.get('/admin', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT NOW() as now');
+    res.send(`🟢 DB connectée avec succès. Heure du serveur SQL : ${rows[0].now}`);
+  } catch (error) {
+    res.status(500).send('🔴 Erreur de connexion à la base de données');
+  }
+});
+
+
 
 // =============================================
 // LANCEMENT DU SERVEUR
