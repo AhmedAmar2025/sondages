@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sondage Politique</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" href="public/favicon.png" type="image/png">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+</head>
+<!----------------Rubrique page global -------------------->
+<body>
+<div class="container">
+  <div class="entete">
+    <img src="/images/entete.jpg" alt="Image centrée">
+  </div>
+  <div class="text-defilant">
+    <p>le prémier institut de sondage en Mauritanie</p>
+  </div>
+  <br>
+ <!----------------Rubrique Top candidats -------------------->
+  <% if (topCandidat) { %>
+    <div class="top-candidat">
+      <div class="candidat top">
+        <h3>الشخصية السياسية الأكثر شعبية في موريتانيا</h3>
+        <h3>La personnalité politique la plus populaire en Mauritanie</h3> 
+        <div id="date-heure"></div>
+        <hr style="border: none; height: 1px; background-color: #ffffff; margin: 10px 0;">
+        <img src="/uploads/<%= topCandidat.photo %>" alt="<%= topCandidat.nom %>" class="photo-candidat-top" />
+        <h3><%= topCandidat.nom %></h3>
+        <% if (totalVotes > 0) { %>
+          <p><strong>Pourcentage :</strong> <%= ((topCandidat.votes / totalVotes) * 100).toFixed(1) %>%</p>
+          <p><strong>Total votes :</strong> <%= totalVotes %></p>
+        <% } else { %>
+          <p><strong>Pourcentage :</strong> 0%</p>
+          <p><strong>Total votes :</strong> 0</p>
+        <% } %>
+        <p class="top-candidat-description"><%= topCandidat.description || '' %></p>
+      </div>
+    </div>
+    <% } %>
+ <!----------------Rubrique titre des candidats -------------------->
+    <div class="titre">
+      <h4>صوت للشخصية السياسية الأفضل بالنسبة لك<br>Choisissez votre personnalité politique préférée</h4>
+    </div>      
+  <!----------------Rubrique candidats vote -------------------->
+  <section class="slider-section">
+    <div class="slider-wrapper">
+      <div class="slider-track">
+        <div class="candidats">
+          <% candidats.forEach(candidat => { 
+            const pourcentage = totalVotes > 0 ? ((candidat.votes / totalVotes) * 100).toFixed(1) : 0;
+          %>
+            <div class="candidat">
+              <div class="tooltip">  
+                <p><strong>Total votes :</strong> <%= totalVotes %></p>                         
+                <img src="/uploads/<%= candidat.photo %>" alt="<%= candidat.nom %>" class="photo-candidat" 
+                     onerror="this.src='/uploads/default.jpg'"/>
+                <span class="tooltiptext">
+                  <%= candidat.nom %> <%= candidat.fonction %><br><%= candidat.description || '' %>
+                </span>
+              </div>
+              <p>
+                <span class="votes" id="vote-count-<%= candidat.id %>"><%= candidat.votes %></span></br>
+                (<%= pourcentage %>%)
+              </p>             
+              <div class="candid">
+                <div class="progress-barC-background">
+                    <div class="progress-barC" 
+                         id="progress-candidat-<%= candidat.id %>" 
+                         data-percentage="<%= pourcentage %>">
+                         0% <!-- Texte initial -->
+                 
+                       "<%= pourcentage %>"
+                       <%= pourcentage %>%
+                
+                  </div>
+                </div>             
+              </div>           
+              <br>  
+            
+              <button type="button" class="vote-button" onclick="voterPourCandidat('<%= candidat.id %>', event)">Voter</button>
+              <div id="message-<%= candidat.id %>" class="message-feedback" style="display:none; margin-top:8px; font-weight:bold;"></div>
+              
+              
+
+
+              
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    </div>
+  </section>
+
+ 
+  <div class="banner-carousel">
+    <% bannieres.forEach(banniere => { %>
+      <img class="banner-slide" src="/uploads/<%= banniere.image %>" alt="<%= banniere.titre %>">
+    <% }) %>
+  </div></br>
+ 
+
+
+<!--------Rubrique secteurs vote -->
+<div class="section-secteurs">   
+          <div class="titre-ligne">
+            <h3>تقييم المؤسسات العمومية<br>Évaluation des institutions publiques</h3>
+            <hr>
+          </div>
+    <div class="container-secteurs">
+      <% secteurs.forEach(function(secteur) { %>
+        <div class="carte-secteurs">
+          <div class="secteur">
+            <div class="logo-secteur">
+              <% if (secteur.logo) { %>
+                <p><span id="total-global-votes"><%= totalGlobalVotes %></span> votes</br>
+               Total votes secteur: <span id="total-secteur-<%= secteur.id %>"><%= secteur.votes_oui + secteur.votes_non %></span></p>
+                <hr style="border: none; height: 1px; background-color: #f8f8f7; margin: 10px 0;"> 
+                <img src="/uploads/<%= secteur.logo %>" alt="Logo <%= secteur.nom %>">          
+              <% } else { %>
+                <p>Pas de logo disponible</p>
+              <% } %>
+            </div>
+                <h2 class="titre-arabe"><%= secteur.nom_ar %></h2>
+                <h2 class="titre-francais"><%= secteur.nom %></h2>
+                <hr style="border: none; height: 1px; background-color: #f08f07; margin: 10px 0;">   
+              <div id="secteur-<%= secteur.id %>">
+                   <div class="total-votants" id="total-<%= secteur.id %>">
+                    <p>Votes Oui : <span id="oui-count-<%= secteur.id %>"><%= secteur.votes_oui %></span></p>
+                    <p>Votes Non : <span id="non-count-<%= secteur.id %>"><%= secteur.votes_non %></span></p>
+                     <p><strong>Satisfaction :</strong> <span id="pourcentage-<%= secteur.id %>"><%= secteur.pourcentage.toFixed(2) %></span>%</p>
+                    </div>
+                    <div class="progress-container">
+                     <div id="progression-<%= secteur.id %>" class="progress-bar" data-pourcentage="<%= secteur.pourcentage.toFixed(1) %>">
+                     <%= secteur.pourcentage.toFixed(1) %>%
+                    </div>
+                    </div><br>
+                    <form id="voteForm-<%= secteur.id %>" method="POST">
+                      <input type="hidden" name="secteurId" value="<%= secteur.id %>">
+                      <button type="submit" class="vote-btn btn-oui" data-secteur="<%= secteur.id %>" data-reponse="oui">😊 Voter Oui</button>
+                      <button type="submit" class="vote-btn btn-non" data-secteur="<%= secteur.id %>" data-reponse="non">😞 Voter Non</button>
+                    </form>
+                    <div id="message-<%= secteur.id %>" class="vote-message"></div>
+              </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>  
+ </div></br>
+
+
+
+ <!----------------Rubrique satisfaction du gov -------------------->
+ <div id="satisfaction-section">
+  <h4>Évaluation du gouvernement</h4>
+  <img id="satisfaction-image" src="/images/prsidence.jpg" alt="Satisfaction" />
+  <h3>
+    هل انت راض عن أداء الحكومة الحالية<br />
+    Êtes-vous satisfait de la performance du gouvernement ?
+  </h3>
+  <div class="vote-container">
+    <div class="vote-result">
+      <p><span id="result-oui"><%= satisfactionStats.oui || 0 %></span></p>
+      <button type="button" onclick="voterSatisfaction('oui')">Oui</button>
+
+   
+
+    </div>
+    <div class="vote-result">
+      <p><span id="result-non"><%= satisfactionStats.non || 0 %></span></p>
+      <button type="button" onclick="voterSatisfaction('non')">Non</button>
+    </div>
+  </div>
+  <div class="vote-feedback" id="vote-feedback" style="display:none;">Merci pour votre vote ! 🙏</div>
+</div>
+
+<!----------------Rubrique footer -------------------->
+  <footer>
+    يتم اختيار المشاركين في الاستطلاع حسب معاييرخاصة وشروط محددة ودقيقة 
+    <div class="entete">
+      <img src="/images/entete.jpg" alt="Image centrée">
+      Tous droits réservés &copy; institut de sondage Mizane Echaab 2025 - NKC.Mr &copy;47 69 69 69
+    </div>
+  </footer>
+</div>
+
+<script>
+function voterPourCandidat(id) {
+  // Cacher les messages au début
+  document.getElementById(`message-success-${id}`).style.display = 'none';
+  document.getElementById(`message-error-${id}`).style.display = 'none';
+
+  fetch(`/vote-candidat/${id}`, {
+    method: 'POST'
+  })
+  .then(response => {
+    if (!response.ok) {
+      // Affiche un message si le vote est refusé (déjà voté)
+      document.getElementById(`message-error-${id}`).style.display = 'block';
+      return;
+    }
+    return response.json();
+  })
+  .then(data => {
+    if (data && data.message) {
+      // Vote accepté : incrémente visuellement
+      const compteur = document.getElementById(`votes-${id}`);
+      compteur.textContent = parseInt(compteur.textContent) + 1;
+
+      // Affiche le message de succès
+      document.getElementById(`message-success-${id}`).style.display = 'block';
+    }
+  })
+  .catch(error => {
+    console.error("Erreur:", error);
+  });
+}
+
+
+
+
+function voterPourCandidat(id, event) {
+  console.log("Fonction voterPourCandidat atteinte !");
+  event.preventDefault();
+
+  fetch(`/vote-candidat/${id}`, {
+    method: 'POST'
+  })
+  .then(response => {
+    if (!response.ok) {
+      // Affiche un message HTML plutôt qu'une alerte
+      const message = document.getElementById(`message-${id}`);
+      message.textContent = "⛔ Vous avez déjà voté.";
+      message.style.color = "white";
+      message.style.display = "block";
+      return;
+    }
+    return response.json();
+  })
+  .then(data => {
+    if (data && data.message) {
+      const compteur = document.getElementById(`votes-${id}`);
+      const bar = document.getElementById(`bar-${id}`);
+      const message = document.getElementById(`message-${id}`);
+
+      // Met à jour le nombre de votes (affiché)
+      if (compteur) {
+        compteur.textContent = parseInt(compteur.textContent) + 1;
+      }
+
+      // Met à jour la barre de progression si `data.pourcentage` est fourni
+      if (data.pourcentage && bar) {
+        bar.style.width = `${data.pourcentage}%`;
+        bar.textContent = `${data.pourcentage}%`;
+      }
+
+      // Affiche le message de succès
+      message.textContent = "✅ Merci pour votre vote !";
+      message.style.color = "white";
+      message.style.display = "block";
+    }
+  })
+  .catch(error => {
+    console.error("Erreur:", error);
+  });
+}
+
+
+
+
+
+
+
+
+
+</script>
+
+<script>
+function voterSatisfaction(reponse) {
+  const feedback = document.getElementById('vote-feedback');
+  console.log("Vote envoyé :", reponse);
+
+  fetch('/satisfaction/vote-satisfaction', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reponse })
+  })
+  .then(async response => {
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Une erreur est survenue.');
+    }
+
+    // Succès
+    feedback.textContent = '✅ Merci ! Votre vote a bien été enregistré.';
+    feedback.style.backgroundColor = '#d4edda';
+    feedback.style.color = '#155724';
+    feedback.style.border = '1px solid #c3e6cb';
+    feedback.style.display = 'block';
+  })
+  .catch(error => {
+    // Erreur ou vote déjà effectué
+    const msg = error.message.includes('déjà') 
+      ? '⚠️ Vous avez déjà voté. Merci!.'
+      : '❌ Une erreur est survenue. Veuillez réessayer.';
+
+    feedback.textContent = msg;
+    feedback.style.backgroundColor = '#fc0718';
+    feedback.style.color = '#fffcfc';
+    feedback.style.border = '1px solid #f5c6cb';
+    feedback.style.display = 'block';
+  });
+}
+
+  </script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const slides = document.querySelectorAll(".banner-slide");
+  let currentIndex = 0;
+  const delay = 4000; // 4 secondes
+
+  if (slides.length === 0) return; // Pas d'image, rien à faire
+
+  slides[currentIndex].classList.add("active");
+
+  setInterval(() => {
+    slides[currentIndex].classList.remove("active");
+    currentIndex = (currentIndex + 1) % slides.length;
+    slides[currentIndex].classList.add("active");
+  }, delay);
+});
+</script>
+<script>
+  document.querySelectorAll('.vote-btn').forEach(button => {
+    button.addEventListener('click', function (e) {
+      e.preventDefault(); // empêche le formulaire de se soumettre normalement
+
+      const secteurId = this.dataset.secteur;
+      const reponse = this.dataset.reponse;
+
+      fetch(`/secteurs/vote/${secteurId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `reponse=${encodeURIComponent(reponse)}`
+      })
+      .then(res => res.json())
+      .then(data => {
+        const msgDiv = document.getElementById(`message-${secteurId}`);
+        if (data.message) {
+          msgDiv.textContent = data.message;
+          msgDiv.style.color = 'green';
+        } else if (data.error) {
+          msgDiv.textContent = data.error;
+          msgDiv.style.color = 'red';
+        }
+      })
+      .catch(err => {
+        console.error('Erreur lors du vote secteur:', err);
+      });
+    });
+  });
+</script>
+<style>
+.progress-bar {
+  height: 24px;
+  background-color: #4CAF50;
+  color: white;
+  text-align: center;
+  line-height: 24px;
+  transition: width 0.5s ease-in-out; /* 👈 Animation fluide */
+  border-radius: 5px;
+}
+
+
+
+
+</style>
+<script src="/script.js"></script>
+</body>
+</html>

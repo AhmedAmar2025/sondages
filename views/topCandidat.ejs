@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top Candidat</title>
+  <style>
+    .top-candidat {
+      text-align: center;
+      font-family: Arial, sans-serif;
+    }
+    .photo-candidat-top {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-candidat">
+    <h2>Top Candidat</h2>
+
+    <% if (topCandidat && topCandidat.photo) { %>
+      <img src="/uploads/<%= topCandidat.photo %>" alt="<%= topCandidat.nom %>" class="photo-candidat-top" />
+    
+
+    <% } else { %>
+      <img src="/uploads/default.jpg" alt="Candidat sans photo" class="photo-candidat-top" />
+    <% } %>
+
+    <h3><%= topCandidat.nom %></h3>
+    <p><strong>Votes :</strong> <%= topCandidat.votes %></p>
+    <p><strong>Pourcentage :</strong> <%= ((topCandidat.votes / totalVotes) * 100).toFixed(1) %> %</p>
+    <p><strong>Nombre total des votants :</strong> <%= totalVotes %></p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+
+{
+    "watch": [
+      "app.js",
+      "routes/",
+      "controllers/",
+      "models/",
+      "config/"
+    ],
+    "ignore": [
+      "public/uploads/**",
+      "*.zip",
+      "*.tmp",
+      "*.log",
+      "node_modules/",
+      ".git/",
+      "test*.js"
+    ],
+    "ext": "js,json,ejs",
+    "verbose": false,
+    "delay": 1500
+  }

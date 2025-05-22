@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="/admin.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+
+
+
+  <h1>Panneau d'Administration</h1>
+  <a href="/logout">Se déconnecter</a>
+
+  <h2>Ajouter un candidat</h2>
+  <form id="form-ajout-candidat" action="/admin/ajouter-candidat" method="POST" enctype="multipart/form-data">
+    <input type="text" name="nom" required />
+    <input type="text" name="parti" />
+    <input type="text" name="fonction" />
+    <textarea name="description"></textarea>
+    <input type="file" name="photo" required />
+    <button type="submit">Ajouter</button>
+  </form>
+
+  <script>
+    document.getElementById('form-ajout-candidat').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const response = await fetch('/admin/ajouter-candidat', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await response.json();
+      if (response.ok) {
+        const top = document.getElementById('top-candidats');
+        const div = document.createElement('div');
+        div.className = 'candidat';
+        div.innerHTML = `
+          <img src="/uploads/${data.photo}" alt="${data.nom}" width="100">
+          <p>${data.nom}</p>
+          <p>${data.fonction}</p>
+        `;
+        top?.prepend(div);
+        this.reset();
+      } else {
+        alert(data.message || "Erreur lors de l'ajout.");
+      }
+    });
+  </script>
+ 
+  
+
+  <h2>Liste des Candidats</h2>
+  <table class="table-style">
+    <thead>
+      <tr>
+        <th>Photo</th>
+        <th>Nom</th>
+        <th>Fonction</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% candidats.forEach(c => { %>
+        <tr>
+          <td><img src="/uploads/<%= c.photo %>" alt="<%= c.nom %>" width="80"></td>
+          <td><%= c.nom %></td>
+          <td><%= c.fonction %></td>
+          <td>
+            <form action="/admin/supprimer-candidat" method="POST">
+              <input type="hidden" name="candidatId" value="<%= c.id %>">
+              <button type="submit">Supprimer</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <!-- GESTION DES SECTEURS -->
+  <section>
+    <h2>Secteurs</h2>
+    <form action="/admin/ajouter-secteur" method="POST" enctype="multipart/form-data">
+      <label for="nom">Nom du secteur :</label>
+      <input type="text" name="nom" id="nom" required>
+      <label for="nom_ar">Nom arabe :</label>
+      <input type="text" name="nom_ar" id="nom_ar" required>
+      <label for="logo">Logo :</label>
+      <input type="file" name="logo" id="logo" required>
+      <button type="submit">Ajouter Secteur</button>
+    </form>
+
+
+
+
+    <h2>Liste des Secteurs</h2>
+    <table class="table-style">
+      <thead>
+        <tr>
+          <th>Logo</th>
+          <th>Nom</th>
+          <th>Nom Arabe</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% secteurs.forEach(secteur => { %>
+          <tr>
+            <td>
+              <% if (secteur.logo) { %>
+                <img src="/uploads/<%= secteur.logo %>" alt="Logo" width="80">
+              <% } else { %>
+                Aucun
+              <% } %>
+            </td>
+            <td><%= secteur.nom %></td>
+            <td><%= secteur.nom_ar %></td>
+            <td>
+              <form action="/admin/secteurs/delete/<%= secteur.id %>" method="POST">
+                <button type="submit">Supprimer</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <h2>Ajouter une Bannière</h2>
+    <form action="/admin/ajouter-banniere" method="POST" enctype="multipart/form-data">
+      <input type="text" name="titre" placeholder="Titre de la bannière" required>
+      <input type="file" name="image" accept="image/*" required>
+      <button type="submit">Ajouter une bannière</button>
+    </form>
+    
+    
+
+    <h2>Liste des Bannières</h2>
+    <table class="table-style">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% bannieres.forEach(banniere => { %>
+          <tr>
+            <td>
+              <% if (banniere.image) { %>
+                <img src="/uploads/<%= banniere.image %>" alt="Bannière" width="150">
+              <% } else { %>
+                Aucune
+              <% } %>
+            </td>
+            <td>
+              <form action="/admin/bannieres/delete/<%= banniere.id %>" method="POST">
+                <button type="submit">Supprimer</button>
+              </form>
+
+           
+
+
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <!-- Carrousel automatique -->
+    <div class="banner-container">
+      <% bannieres.forEach((b, i) => { %>
+        <img src="/uploads/<%= b.image %>" class="banner-slide <%= i === 0 ? 'active' : '' %>">
+      <% }) %>
+    </div>
+
+    <script>
+      let index = 0;
+      const slides = document.querySelectorAll('.banner-slide');
+      setInterval(() => {
+        slides.forEach((slide, i) => {
+          slide.classList.toggle('active', i === index);
+        });
+        index = (index + 1) % slides.length;
+      }, 4000);
+    </script>
+
+    <!-- Actions admin -->
+    <form action="/admin/reset-votes" method="POST">
+      <button type="submit" onclick="return confirm('Êtes-vous sûr de vouloir réinitialiser tous les votes ?')">Réinitialiser candidats</button>
+    </form>
+
+    <form action="/admin/reset-votes-secteurs" method="POST"onsubmit="return confirm('Confirmer la remise à zéro des votes des secteurs ?');">
+      <button type="submit">Réinitialiser les votes des secteurs</button>
+    </form>
+
+
+    <form action="/reset-satisfaction" method="POST"onsubmit="return confirm('Confirmer la remise à zéro des votes de satisfaction ?');">
+      <button type="submit">Réinitialiser les votes de satisfaction</button>
+    </form>
+
+
+
+
+    <h3>Réinitialiser les votes de satisfaction</h3>
+    <form action="/satisfaction/reset-satisfaction" method="POST" onsubmit="return confirm('Confirmer la réinitialisation des votes satisfaction ?')">
+      <button type="submit">🔄 Réinitialiser Satisfaction</button>
+    </form>
+
+
+
+  </section>
+
+  <style>
+  
+  </style>
+</body>
+</html>
