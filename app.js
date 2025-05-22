@@ -17,6 +17,7 @@ process.on('unhandledRejection', (err) => {
   console.error('Promesse rejetée non gérée:', err);
 });
 
+console.log(process.env.DB_HOST); // doit afficher "tramway.proxy.rlwy.net"
 
 // Load environment variables
 dotenv.config({ path: process.env.ENV_PATH || './secret.env' });
